@@ -1,89 +1,90 @@
-// 1. Press the number we save that number some where
-// 2. Press the operator
-//3. Press the second number 
-// 4. Press the equal sign that make calculation
-
-
-let firstNumber 
-let secondNumber 
-let step = 0
-let operation
-let result =  0
-let numArray = []
-let secondNumArray = []
-let expression = ''
-
 let display = document.getElementById('display')
-
+let expression = ""
 
 function getNumber(num){
-    return;
-    if(step === 0 || step === 1){
-        numArray.push(num)
-        step=1
-        firstNumber = Number(numArray.join('')) // merge into one string
-        display.value = firstNumber
-    } else if (step === 2){
-        secondNumArray.push(num)
-        secondNumber = Number(secondNumArray.join(''))
-        display.value = secondNumber
-    }
+    expression+=num
+    display.value = expression
 }
-
-
 function getOperator(op){
-    step = 2
-    operation = op
+    expression+=op
+    display.value = expression
 }
 
 function clearDisplay(){
-    display.value = 0
-    firstNumber = null
-    secondNumber = null
-    step = 0
-    operation = null
-    result = 0
-    numArray = []
-    secondNumArray = []
+    expression = ''
+    display.value = ''
 }
 
-// const calculateEquals = ()=>{
-//     if(operation === '+'){
-//         result = firstNumber + secondNumber
-//         display.value = result
-//     } else if (operation === '-' ){
-//         result = firstNumber - secondNumber
-//         display.value = result
-//     } else if ( operation === '*'){
-//         result = firstNumber * secondNumber
-//         display.value = result
-//     } else if ( operation === '/'){
-//         result = firstNumber / secondNumber
-//         display.value = result
-//     }
-// }
-// display.value = result
-function calculateEquals  (a,b,c){
+function isOperator(char){
+    return['+','-','*','/'].includes(char)
+}
+
+function calculateEquals(){
+let numStack = []
+let operatorStack = []
+let num = ""
+for(let i= 0; i<expression.length; i++){
+    let element = expression[i] 
+    if(! isNaN(element)) {
+        num+=element
+    } else if(isOperator(element)){
+        numStack.push(parseFloat(num))
+        num = ""
+
+        while(operatorStack.length > 0 && precedance(operatorStack[operatorStack.length -1]) >= precedance(element)) {
+            let second = numStack.pop()
+            let first = numStack.pop()
+            let operator = operatorStack.pop()
+            numStack.push(calculateEquals1(first,second,operator))
+        }
+        operatorStack.push(element)
+    }
+    
+}
+numStack.push(parseFloat(num))
+
+while(operatorStack.length > 0) {
+    let second = numStack.pop()
+    let first = numStack.pop()
+    let operator = operatorStack.pop()
+    numStack.push(calculateEquals1(first,second,operator))
+}
+
+
+let result = numStack.pop()
+display.value = result;
+
+}
+
+function calculateEquals1  (a,b,c){
     let result;
     switch (c) {
       case '+':
         result = a + b;
-        display.value = result
         break;
       case '-':
         result = a - b;
-        display.value = result
         break;
       case '*':
         result = a * b;
-        display.value = result
         break;
       case '/':
         result = a / b;
-        display.value = result
         break;
       default:
         result = 'Invalid operator';
     }
     return result;
-  }
+}
+
+
+function precedance(operator) {
+    if(operator === "+" || operator === "-") {
+        return 1; 
+    }
+    else if(operator === "*" || operator === "/") {
+        return 2;
+    }
+    return 0; 
+}
+
